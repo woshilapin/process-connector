@@ -1,0 +1,7 @@
+[package]
+name = "process-connector"
+version = "0.0.1"
+authors = [ "woshilapin <woshilapin@tuziwo.info>" ]
+
+[dependencies]
+getopts = "0.2.14"
