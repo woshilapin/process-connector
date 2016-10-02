@@ -58,7 +58,7 @@ fn main() {
 
     let mut process_a = Process::new("game", cmd_a);
     let mut process_b = Process::new("bot", cmd_b);
-    process_a.init();
-    process_b.init();
+    process_a.init(100);
+    process_b.init(100);
     connect(&mut process_a, &mut process_b);
 }

@@ -1,6 +1,7 @@
 use std::io::{BufRead, BufReader, BufWriter, Write};
 use std::process::{Child, Command, Stdio};
 use std::sync::mpsc;
+use std::time;
 use std::thread;
 
 pub struct Process<'a> {
@@ -30,7 +31,7 @@ impl<'a> Process<'a> {
         }
     }
 
-    pub fn init(&mut self) {
+    pub fn init(&mut self, delay: u64) {
         let tx = self.tx.clone();
         let stdout = self.process.stdout.take().unwrap();
 
@@ -44,8 +45,7 @@ impl<'a> Process<'a> {
 
             for line in reader.lines() {
                 tx.send(Some(line.unwrap())).unwrap();
-                use std::time;
-                thread::sleep(time::Duration::from_millis(500));
+                thread::sleep(time::Duration::from_millis(delay));
             }
         }).unwrap();
     }
