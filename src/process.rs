@@ -4,7 +4,7 @@ use std::sync::mpsc;
 use std::thread;
 
 pub struct Process<'a> {
-    name: &'a str,
+    pub name: &'a str,
     process: Child,
     tx: mpsc::Sender<Option<String>>,
     rx: mpsc::Receiver<Option<String>>,
@@ -42,10 +42,8 @@ impl<'a> Process<'a> {
                 None => { "default" }
             };
 
-            println!("{}: launching loop in process", name);
             for line in reader.lines() {
                 tx.send(Some(line.unwrap())).unwrap();
-                println!("{}: line printed", name);
                 use std::time;
                 thread::sleep(time::Duration::from_millis(500));
             }
@@ -56,16 +54,13 @@ impl<'a> Process<'a> {
         let stdin = self.process.stdin.as_mut().unwrap();
         let mut writer = BufWriter::new(stdin);
 
-        print!("{}: sending message <{}>...", self.name, format_args!("{}", msg));
         writer.write_fmt(format_args!("{}\n", msg)).unwrap();
         writer.flush().unwrap();
-        println!(" done");
     }
 
     pub fn pop(&mut self) -> Option<String> {
         let data = self.rx.try_recv();
         if data.is_ok() {
-            println!("{}: data poped <{}>", self.name, data.clone().unwrap().unwrap());
             data.unwrap()
         } else {
             None

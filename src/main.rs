@@ -14,14 +14,14 @@ fn connect(process_a: &mut Process, process_b: &mut Process) {
     loop {
         match process_a.pop() {
             Some(packet) => {
-                println!("{}", packet);
+                println!("{}: {}", process_a.name, packet);
                 process_b.push(packet);
             }
             None => {}
         }
         match process_b.pop() {
             Some(packet) => {
-                println!("{}", packet);
+                println!("{}: {}", process_b.name, packet);
                 process_a.push(packet);
             }
             None => {}
