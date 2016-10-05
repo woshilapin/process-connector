@@ -19,6 +19,18 @@ fn connect(process_a: &mut Process, process_b: &mut Process) {
             }
             None => {}
         }
+        match process_a.pop_err() {
+            Some(packet) => {
+                println!("{} [err]: {}", process_a.name, packet);
+            }
+            None => {}
+        }
+        match process_b.pop_err() {
+            Some(packet) => {
+                println!("{} [err]: {}", process_b.name, packet);
+            }
+            None => {}
+        }
         match process_b.pop() {
             Some(packet) => {
                 println!("{}: {}", process_b.name, packet);
@@ -58,7 +70,7 @@ fn main() {
 
     let mut process_a = Process::new("game", cmd_a);
     let mut process_b = Process::new("bot", cmd_b);
-    process_a.init(100);
-    process_b.init(100);
+    process_a.init(0);
+    process_b.init(0);
     connect(&mut process_a, &mut process_b);
 }

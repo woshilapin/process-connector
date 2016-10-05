@@ -9,6 +9,8 @@ pub struct Process<'a> {
     process: Child,
     tx: mpsc::Sender<Option<String>>,
     rx: mpsc::Receiver<Option<String>>,
+    tx_err: mpsc::Sender<Option<String>>,
+    rx_err: mpsc::Receiver<Option<String>>,
 }
 
 impl<'a> Process<'a> {
@@ -23,28 +25,34 @@ impl<'a> Process<'a> {
             .spawn().unwrap();
 
         let (tx, rx) = mpsc::channel();
+        let (tx_err, rx_err) = mpsc::channel();
         Process {
             name: name,
             process: process,
             tx: tx,
             rx: rx,
+            tx_err: tx_err,
+            rx_err: rx_err,
         }
     }
 
     pub fn init(&mut self, delay: u64) {
         let tx = self.tx.clone();
+        let tx_err = self.tx_err.clone();
         let stdout = self.process.stdout.take().unwrap();
+        let stderr = self.process.stderr.take().unwrap();
 
         thread::Builder::new().name(self.name.to_string()).spawn(move || {
-            let current = thread::current();
             let reader = BufReader::new(stdout);
-            let name = match current.name() {
-                Some(n) => { n }
-                None => { "default" }
-            };
-
             for line in reader.lines() {
                 tx.send(Some(line.unwrap())).unwrap();
+                thread::sleep(time::Duration::from_millis(delay));
+            }
+        }).unwrap();
+        thread::Builder::new().name(self.name.to_string()).spawn(move || {
+            let reader = BufReader::new(stderr);
+            for line in reader.lines() {
+                tx_err.send(Some(line.unwrap())).unwrap();
                 thread::sleep(time::Duration::from_millis(delay));
             }
         }).unwrap();
@@ -60,6 +68,15 @@ impl<'a> Process<'a> {
 
     pub fn pop(&mut self) -> Option<String> {
         let data = self.rx.try_recv();
+        if data.is_ok() {
+            data.unwrap()
+        } else {
+            None
+        }
+    }
+
+    pub fn pop_err(&mut self) -> Option<String> {
+        let data = self.rx_err.try_recv();
         if data.is_ok() {
             data.unwrap()
         } else {
