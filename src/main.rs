@@ -21,13 +21,13 @@ fn connect(process_a: &mut Process, process_b: &mut Process) {
         }
         match process_a.pop_err() {
             Some(packet) => {
-                println!("{} [err]: {}", process_a.name, packet);
+                println!("{} [log]: {}", process_a.name, packet);
             }
             None => {}
         }
         match process_b.pop_err() {
             Some(packet) => {
-                println!("{} [err]: {}", process_b.name, packet);
+                println!("{} [log]: {}", process_b.name, packet);
             }
             None => {}
         }
